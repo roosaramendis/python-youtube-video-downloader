@@ -112,10 +112,10 @@ class dowload_selected_tread(QtCore.QThread):
                         pass
                     else:
                         vqulity = "720p"
-                    print(vqulity+" donwloading")
+                    print(vqulity+" downloading")
                     self.calldowloadvideo.emit(str(yturl),str(vqulity))
                     while d_finished1[0] == False:
-                        print("waiting for downloading "+ vname)
+                        print(" downloading "+ vname)
                         time.sleep(0.3)
                     videostate[vname] = "downloaded"
                 except Exception as e:
@@ -476,7 +476,7 @@ class Ui_Form(object):
                     svqulity = "720p"
                         
 
-            print(str(svqulity)+" donwloading")
+            print(str(svqulity)+" downloading")
             print(type(askeverytime[0]))
             if usecustomedowpath[0] == "true"and vurl !="":
                 downloadpath[0] = customdownloadpathstr[0]
