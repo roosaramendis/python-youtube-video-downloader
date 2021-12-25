@@ -1,12 +1,12 @@
 # python-youtube-video-downloader
 FOS python youtube video downloader
 
-Description
+# Description
 
 YouTube is the most popular video-sharing platform in the world and sometimes you may encounter a situation where you want to script or use some other website to download videos. some times when we going to download video with websites 
 have to face to some kind of problems like popup some ads and difficult to download playlists. i made this software as a solution for that problems and specialy to make it easy to download playlist or few playlists. and for impropeve my programing knowladge as beginer programer.
 
-Features
+# Features
 
 1.download youtube video with any available qulity.
 2.download youtube playlist on few playlist with one click.
