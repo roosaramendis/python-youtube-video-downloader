@@ -8,13 +8,13 @@ have to face to some kind of problems like popup some ads and difficult to downl
 
 Features
 
-download youtube video with any available qulity
-download youtube playlist on few playlist with one click
-able to create you own playlist
-able to download only selected from playlist
-able to save created playlist in to your hdd
-customizable UI
-lightweight
+1.download youtube video with any available qulity.
+2.download youtube playlist on few playlist with one click.
+3.able to create you own playlist.
+4.able to download only selected from playlist.
+5.able to save created playlist in to your hdd.
+6.customizable UI.
+7.lightweight.
 
 *you can download videos with any avaible qulity but but some high qulity formats are downloading video and audion separatly
 and high qulitys are not available in play list download. when you download playlist you can only download with this qulitys (720p,360p,144p)
