@@ -112,10 +112,10 @@ class dowload_selected_tread(QtCore.QThread):
                         pass
                     else:
                         vqulity = "720p"
-                    print(vqulity+" donwloading")
+                    print(vqulity+" downloading")
                     self.calldowloadvideo.emit(str(yturl),str(vqulity))
                     while d_finished1[0] == False:
-                        print("waiting for downloading "+ vname)
+                        print(" downloading "+ vname)
                         time.sleep(0.3)
                     videostate[vname] = "downloaded"
                 except Exception as e:
@@ -476,7 +476,7 @@ class Ui_Form(object):
                     svqulity = "720p"
                         
 
-            print(str(svqulity)+" donwloading")
+            print(str(svqulity)+" downloading")
             print(type(askeverytime[0]))
             if usecustomedowpath[0] == "true"and vurl !="":
                 downloadpath[0] = customdownloadpathstr[0]
@@ -595,7 +595,7 @@ class Ui_Form(object):
             print(str(videostateinfile))
     #this func for meke settings values on reg
     def makesettingvals(self):
-        self.settingval = QSettings("yt downloader","settings vals")
+        self.settingval = QSettings("Dragon yt downloader","settings vals")
     #this func for setting up default settings on reg
     def setdefsettingvals(self):
         settingkeylist = self.settingval.allKeys()
@@ -618,7 +618,7 @@ class Ui_Form(object):
             self.settingval.setValue("bordercolor","#ff0000")    
     #this func for get settings values in reg and seve values to vars 
     def getsettingvals(self):
-        self.settingval = QSettings("yt downloader","settings vals")
+        self.settingval = QSettings("Dragon yt downloader","settings vals")
         borderroundness[0] = str(self.settingval.value("borderroundness"))
         bordersize[0] = str(self.settingval.value("bordersize"))
         textcolor[0] = str(self.settingval.value("textcolor"))
