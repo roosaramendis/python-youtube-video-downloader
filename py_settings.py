@@ -128,6 +128,7 @@ class Ui_Frame(object):
         self.apply.setObjectName("apply")
         self.apply.setStyleSheet(self.commenstyle)
         self.apply.clicked.connect(self.aplly_clk)
+        self.apply.setToolTip("software restart need to apply changes")
         '''self.savenexit = QtWidgets.QPushButton(Frame)
         self.savenexit.setGeometry(QtCore.QRect(440, 450, 81, 23))
         self.savenexit.setObjectName("savenexit")
