@@ -72,6 +72,7 @@ global vqultybyitagdic # to save video qulity as a key and itag as value
 vqultybyitagdic = {}
 #.......................................................
 
+# class for get qualitys in vided
 class getvideoqultys_tread(QtCore.QThread):
 
     setqltycombobox = QtCore.pyqtSignal(list)
@@ -79,7 +80,6 @@ class getvideoqultys_tread(QtCore.QThread):
     def __init__(self,url, parent=None):
         super(getvideoqultys_tread,self).__init__(parent)
         self.url = url
-        #self.qlty = qulity
     def run(self):
         print("geting streams ")
         itagstr = []
@@ -91,13 +91,10 @@ class getvideoqultys_tread(QtCore.QThread):
                 if(re.search("playlist",self.url)):
                     print("its playlist")
                 else:
-                    #self.appendvideodic(self.LE_ulr.text())
-                    #keyslist = self.getkeyslist(videodic)
                     q = YouTube(str(self.url))
                     for s in q.streams.filter(adaptive=True):
                         try:
-                            
-                            
+                    
                             print("itag " + str(s))    
                                 
                         except:
@@ -113,12 +110,10 @@ class getvideoqultys_tread(QtCore.QThread):
                             print(str(s.itag)+" "+str(s.resolution)+" "+str(s.mime_type))
                         
                     print(itagstr)
-                    #vqultybyitagdic = vqultydic
                     print(vqultydic)
                     print(type(itagstr)) 
-                    #self.CB_vqulity.clear()
                     self.setqltycombobox.emit(stlistforcombo)
-                    #self.CB_vqulity.addItems(stlistforcombo)
+                    
         except:
             #errorexct[0] = str(e)
             self.callerror.emit(str(errorexct))    
@@ -723,53 +718,11 @@ class Ui_Form(object):
         self.thread1.start()
         self.thread1.setqltycombobox.connect(self.setqcombobox)
         self.thread1.callerror.connect(self.errorpopup)
-
+    #this func for set combobox list
     def setqcombobox(self,qltylist):
 
         self.CB_vqulity.addItems(qltylist)
     
-    #def getvideosinstreams(self):
-        '''print("geting streams ")
-        itagstr = []
-        vqultydic = {}
-        stlist = ["",""]
-        stlistforcombo = []
-        try:
-            if self.LE_ulr.text() !="":
-                if(re.search("playlist",self.LE_ulr.text())):
-                    print("its playlist")
-                else:
-                    self.appendvideodic(self.LE_ulr.text())
-                    #keyslist = self.getkeyslist(videodic)
-                    q = YouTube(str(self.LE_ulr.text()))
-                    for s in q.streams.filter(adaptive=True):
-                        try:
-                            
-                            
-                            print("itag " + str(s))    
-                                
-                        except:
-                            traceback.print_exc()
-                        else:
-                            itagstr.append(str(s))
-                            stlist[0] = str(s.mime_type)
-                            stlist[1] = str(s.resolution)
-                            stlistforcombo.append(str(stlist))
-                            vqultydic[str(stlist)] = str(s.itag)
-                            vqultybyitagdic[str(stlist)] = (s.itag)
-                            print(str(stlist))
-                            print(str(s.itag)+" "+str(s.resolution)+" "+str(s.mime_type))
-                        
-                    print(itagstr)
-                    #vqultybyitagdic = vqultydic
-                    print(vqultydic)
-                    print(type(itagstr)) 
-                    #self.CB_vqulity.clear()
-                    self.CB_vqulity.addItems(stlistforcombo)
-        except exception as e:
-            errorexct[0] = str(e)
-            self.errorpopup(errorexct)'''
-
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT DOWNLOADER"))
