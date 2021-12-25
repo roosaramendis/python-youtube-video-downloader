@@ -256,7 +256,7 @@ class Ui_Frame(object):
         downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
         customdownloadpathstr[0] = downpath1           
     def getsettingvals(self):
-        self.settingval = QSettings("yt downloader","settings vals")
+        self.settingval = QSettings("Dragon yt downloader","settings vals")
         borderroundness[0] = str(self.settingval.value("borderroundness"))
         bordersize[0] = str(self.settingval.value("bordersize"))
         textcolor[0] = str(self.settingval.value("textcolor"))
