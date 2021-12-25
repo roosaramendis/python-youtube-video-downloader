@@ -581,7 +581,8 @@ class Ui_Form(object):
         self.label.setText(finishvnam+" download finished")
         videostate[finishvnam] = "downloaded"
         #d_finished1 = True
-        try:
+        d_finished1[0] = True
+        '''try:
             self.thread1.setTerminationEnabled(True)
             self.thread1.terminate()
             d_finished1[0] = True
@@ -592,7 +593,7 @@ class Ui_Form(object):
             print(e)
             errorexct[0] = str(e)
             print(errorexct)
-            self.errorpopup(str(errorexct))
+            self.errorpopup(str(errorexct))'''
     #this func for set proggres bar value
     def setProgressVal(self,prval,downloadspeed):
         print(str(prval)+" %")
@@ -727,7 +728,7 @@ class Ui_Form(object):
 
         self.CB_vqulity.addItems(qltylist)
     
-    def getvideosinstreams(self):
+    #def getvideosinstreams(self):
         '''print("geting streams ")
         itagstr = []
         vqultydic = {}
