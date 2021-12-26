@@ -12,6 +12,7 @@
 
 #__________imports_______________
 from logging import exception
+from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QInputDialog,QErrorMessage
 from PyQt5.QtCore import QSettings
@@ -70,6 +71,52 @@ errorexct = [""]
 global vqultybyitagdic # to save video qulity as a key and itag as value
 vqultybyitagdic = {}
 #.......................................................
+
+# class for get qualitys in vided
+class getvideoqultys_tread(QtCore.QThread):
+
+    setqltycombobox = QtCore.pyqtSignal(list)
+    callerror = QtCore.pyqtSignal(str)
+    def __init__(self,url, parent=None):
+        super(getvideoqultys_tread,self).__init__(parent)
+        self.url = url
+    def run(self):
+        print("geting streams ")
+        itagstr = []
+        vqultydic = {}
+        stlist = ["",""]
+        stlistforcombo = []
+        try:
+            if self.url !="":
+                if(re.search("playlist",self.url)):
+                    print("its playlist")
+                else:
+                    q = YouTube(str(self.url))
+                    for s in q.streams.filter(adaptive=True):
+                        try:
+                    
+                            print("itag " + str(s))    
+                                
+                        except:
+                            traceback.print_exc()
+                        else:
+                            itagstr.append(str(s))
+                            stlist[0] = str(s.mime_type)
+                            stlist[1] = str(s.resolution)
+                            stlistforcombo.append(str(stlist))
+                            vqultydic[str(stlist)] = str(s.itag)
+                            vqultybyitagdic[str(stlist)] = (s.itag)
+                            print(str(stlist))
+                            print(str(s.itag)+" "+str(s.resolution)+" "+str(s.mime_type))
+                        
+                    print(itagstr)
+                    print(vqultydic)
+                    print(type(itagstr)) 
+                    self.setqltycombobox.emit(stlistforcombo)
+                    
+        except:
+            #errorexct[0] = str(e)
+            self.callerror.emit(str(errorexct))    
 
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
@@ -237,7 +284,7 @@ class Ui_Form(object):
         self.LE_ulr.setObjectName("LE_ulr")
         self.LE_ulr.setToolTip(" paste url here you want to download . if you need to download playlist you can add yt playlist link and the click add video")
         self.LE_ulr.setStyleSheet(self.textinputstyle)
-        self.LE_ulr.textChanged.connect(self.getvideosinstreams)
+        self.LE_ulr.textChanged.connect(self.getvideosinstreamscall)
         #...........................................................................
 
         #_____________setup of add url button______________________
@@ -529,7 +576,8 @@ class Ui_Form(object):
         self.label.setText(finishvnam+" download finished")
         videostate[finishvnam] = "downloaded"
         #d_finished1 = True
-        try:
+        d_finished1[0] = True
+        '''try:
             self.thread1.setTerminationEnabled(True)
             self.thread1.terminate()
             d_finished1[0] = True
@@ -540,7 +588,7 @@ class Ui_Form(object):
             print(e)
             errorexct[0] = str(e)
             print(errorexct)
-            self.errorpopup(str(errorexct))
+            self.errorpopup(str(errorexct))'''
     #this func for set proggres bar value
     def setProgressVal(self,prval,downloadspeed):
         print(str(prval)+" %")
@@ -662,49 +710,19 @@ class Ui_Form(object):
             errorexct[0] = str(e)
             print(errorexct)
             self.errorpopup(str(errorexct))
-    #this func for get qulitys in paseted video 
-    def getvideosinstreams(self):
-        print("geting streams ")
-        itagstr = []
-        vqultydic = {}
-        stlist = ["",""]
-        stlistforcombo = []
-        try:
-            if self.LE_ulr.text() !="":
-                if(re.search("playlist",self.LE_ulr.text())):
-                    print("its playlist")
-                else:
-                    self.appendvideodic(self.LE_ulr.text())
-                    #keyslist = self.getkeyslist(videodic)
-                    q = YouTube(str(self.LE_ulr.text()))
-                    for s in q.streams.filter(adaptive=True):
-                        try:
-                            
-                            
-                            print("itag " + str(s))    
-                                
-                        except:
-                            traceback.print_exc()
-                        else:
-                            itagstr.append(str(s))
-                            stlist[0] = str(s.mime_type)
-                            stlist[1] = str(s.resolution)
-                            stlistforcombo.append(str(stlist))
-                            vqultydic[str(stlist)] = str(s.itag)
-                            vqultybyitagdic[str(stlist)] = (s.itag)
-                            print(str(stlist))
-                            print(str(s.itag)+" "+str(s.resolution)+" "+str(s.mime_type))
-                        
-                    print(itagstr)
-                    #vqultybyitagdic = vqultydic
-                    print(vqultydic)
-                    print(type(itagstr)) 
-                    #self.CB_vqulity.clear()
-                    self.CB_vqulity.addItems(stlistforcombo)
-        except exception as e:
-            errorexct[0] = str(e)
-            self.errorpopup(errorexct)
+    #this func for get qulitys in paseted video
+    def getvideosinstreamscall(self):
+        print("getting video qulitys")
+        self.thread1 = getvideoqultys_tread(url=str(self.LE_ulr.text()))
 
+        self.thread1.start()
+        self.thread1.setqltycombobox.connect(self.setqcombobox)
+        self.thread1.callerror.connect(self.errorpopup)
+    #this func for set combobox list
+    def setqcombobox(self,qltylist):
+
+        self.CB_vqulity.addItems(qltylist)
+    
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT DOWNLOADER"))
