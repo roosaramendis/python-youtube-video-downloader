@@ -11,6 +11,8 @@
 #github link:
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import webbrowser
+
 commenstyle =("*{border: "+"2px"+" solid "+"red"+";"+
                 "color: "+"red"+";"+
                 "border-radius: "+"2px"+";}"+
@@ -28,14 +30,18 @@ class Ui_Frame(object):
         self.checkupdate.setGeometry(QtCore.QRect(30, 210, 75, 23))
         self.checkupdate.setObjectName("checkupdate")
         self.checkupdate.setStyleSheet(commenstyle)
+        self.checkupdate.clicked.connect(self.openurl)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
 
+    def openurl(self):
+        webbrowser.open_new("https://github.com/roosaramendis/python-youtube-video-downloader")
+
     def retranslateUi(self, Frame):
         _translate = QtCore.QCoreApplication.translate
         Frame.setWindowTitle(_translate("Frame", "info"))
-        self.info.setText(_translate("Frame", "<html><head/><body><p>created by roosara mendis</p><p><br/></p><p>software version :- Test 1</p><p><br/></p><p>web :- blablabla</p></body></html>"))
+        self.info.setText(_translate("Frame", "<html><head/><body><p>created by roosara mendis</p><p><br/></p><p>software version :- Test 1</p><p><br/></p><p>web :- https://github.com/roosaramendis/python-youtube-video-downloader</p></body></html>"))
         self.checkupdate.setText(_translate("Frame", "check update"))
 
 

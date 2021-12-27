@@ -161,10 +161,14 @@ class dowload_selected_tread(QtCore.QThread):
                         vqulity = "720p"
                     print(vqulity+" downloading")
                     self.calldowloadvideo.emit(str(yturl),str(vqulity))
+                    time.sleep(0.4)
+                    print("dfinished state "+str(d_finished1[0]))
                     while d_finished1[0] == False:
                         print(" downloading "+ vname)
                         time.sleep(0.3)
                     videostate[vname] = "downloaded"
+                    time.sleep(0.4)
+                    print("continue")
                 except Exception as e:
                     traceback.print_exc()
                     print(str(e))
@@ -414,6 +418,8 @@ class Ui_Form(object):
             then searching for its playlist url or not if playlist all urls in playlist appendto video dictionary
             (calling to appendvideodic func in loop). else just appendcideodic func in one time .after all calling to 
             listviwer func""" 
+
+        self.CB_vqulity.addItems(["720p","360p","144p"])    
         if self.LE_ulr.text() !="":
             if(re.search("playlist",self.LE_ulr.text())):
                 print("its playlist")
