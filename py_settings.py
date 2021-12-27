@@ -74,6 +74,7 @@ class Ui_Frame(object):
         self.usecustomeDpath.setGeometry(QtCore.QRect(40, 50, 220, 17))
         self.usecustomeDpath.setObjectName("usecustomeDpath")
         self.usecustomeDpath.setStyleSheet(self.commenstyle)
+        self.usecustomeDpath.setToolTip("for use custome download path")
         if usecustomedowpath[0] == "true":
             self.usecustomeDpath.setChecked(True)
         self.usecustomeDpath.stateChanged.connect(self.usecustomedownpath_clk)
@@ -90,6 +91,7 @@ class Ui_Frame(object):
         self.askevertime.setGeometry(QtCore.QRect(40, 70, 220, 17))
         self.askevertime.setObjectName("askevertime")
         self.askevertime.setStyleSheet(self.commenstyle)
+        self.askevertime.setToolTip("will ask path to download every time you press download button")
         if askeverytime[0] == "true":
             self.askevertime.setChecked(True)
         self.askevertime.stateChanged.connect(self.askeverytime_clk)

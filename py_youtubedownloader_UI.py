@@ -418,6 +418,8 @@ class Ui_Form(object):
             then searching for its playlist url or not if playlist all urls in playlist appendto video dictionary
             (calling to appendvideodic func in loop). else just appendcideodic func in one time .after all calling to 
             listviwer func""" 
+
+        self.CB_vqulity.addItems(["720p","360p","144p"])    
         if self.LE_ulr.text() !="":
             if(re.search("playlist",self.LE_ulr.text())):
                 print("its playlist")
