@@ -732,7 +732,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT DOWNLOADER"))
-        self.pb_addurl.setText(_translate("Form", "Add URL"))
+        self.pb_addurl.setText(_translate("Form", "Add Video"))
         self.pb_downloadvideo.setText(_translate("Form", "Download Video"))
         self.pb_downloadselected.setText(_translate("Form", "Download Selected"))
         self.pb_settings.setText(_translate("Form", "settings"))
