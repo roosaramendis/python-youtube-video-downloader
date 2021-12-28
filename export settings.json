@@ -15,11 +15,11 @@
   },
   {
    "optionDest": "console",
-   "value": true
+   "value": false
   },
   {
    "optionDest": "name",
-   "value": "DRAGON YT DONWLOADER test build 3"
+   "value": "DRAGON YT DOWNLOADER v.1.0.0"
   },
   {
    "optionDest": "ascii",
