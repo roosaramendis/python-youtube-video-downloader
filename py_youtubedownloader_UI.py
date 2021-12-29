@@ -731,6 +731,8 @@ class Ui_Form(object):
         try:
             self.thread2.setTerminationEnabled(True)
             self.thread2.terminate()
+            self.thread1.setTerminationEnabled(True)
+            self.thread1.terminate()
             d_finished1[0] = True
             self.progressBar.setValue(0)
             self.label.setText("Stoped")
