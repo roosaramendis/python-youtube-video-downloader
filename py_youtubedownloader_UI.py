@@ -122,6 +122,7 @@ class getvideoqultys_tread(QtCore.QThread):
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
     callerror = QtCore.pyqtSignal(str)
+    suicidefunc = QtCore.pyqtSignal()
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
         self.url = url
@@ -131,11 +132,23 @@ class dowload_selected_tread(QtCore.QThread):
         return link
     def run(self):
         
-        if usecustomedowpath[0] == "true":
+        if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
             downloadpath[0] = customdownloadpathstr[0]
-        if askeverytime[0]== "true":
+            print("usecustom path "+ downloadpath[0])
+        elif askeverytime[0]== "true":
+                #downloadpath.clear()
             downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
-            downloadpath[0] = downpath1
+            if downpath1 != "":
+                downloadpath[0] = downpath1
+            else:
+                print("canceled") 
+                self.suicidefunc.emit()   
+            print("downloadpath is "+ downloadpath[0])
+        elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
+            if not(os.path.exists(downloadpath[0])):
+                os.makedirs(mydir+"/videos")
+
+            downloadpath[0] = [mydir+"/videos"]
         for vname in selectedvideos:
             print("dfinished "+str(d_finished1[0]))
             if videostate.get(vname) == "q" or videostate.get(vname) == "error":
@@ -246,8 +259,8 @@ class video_dowload_tread(QtCore.QThread):
         except:
             traceback.print_exc()
             try:
-                print("reslution fix area")
-                self.video = yt.streams.filter(adaptive=True).get_highest_resolution()
+                print("selected quality not available in video.going to download highest res available")
+                self.video = yt.streams.filter(progressive=True).get_highest_resolution()
                 self.video.download(downloadpath[0])
             except Exception as e:
                 print(str(e))
@@ -490,10 +503,11 @@ class Ui_Form(object):
         
         yturl = "self.getvideolink(vname)"
         vqulity = self.CB_vqulity.currentText()
-        self.thread1 = dowload_selected_tread(url= yturl,qulity= vqulity)
-        self.thread1.start()
-        self.thread1.calldowloadvideo.connect(self.downloadytvideo)
-        self.thread1.callerror.connect(self.errorpopup)
+        self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
+        self.thread2.start()
+        self.thread2.calldowloadvideo.connect(self.downloadytvideo)
+        self.thread2.callerror.connect(self.errorpopup)
+        self.thread2.suicidefunc.connect(self.stoptreads)
     #this func for do functionly when clicked download video button
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
@@ -530,15 +544,21 @@ class Ui_Form(object):
                         
 
             print(str(svqulity)+" downloading")
-            print(type(askeverytime[0]))
-            if usecustomedowpath[0] == "true"and vurl !="":
+            if usecustomedowpath[0] == "true"and vurl !=""and customdownloadpathstr[0] !="":
                 downloadpath[0] = customdownloadpathstr[0]
-                print("downpath in usecustom path "+ downloadpath[0])
-            if askeverytime[0]== "true" and vurl !="":
+                print("usecustom path "+ downloadpath[0])
+            elif askeverytime[0]== "true" and vurl !="":
                 #downloadpath.clear()
                 downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
-                downloadpath[0] = downpath1
-                
+                if downpath1 != "":
+                    downloadpath[0] = downpath1
+                print("downloadpath is "+ downloadpath[0])
+            elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
+                if not(os.path.exists(downloadpath[0])):
+                    os.makedirs(mydir+"/videos")
+
+                downloadpath[0] = [mydir+"/videos"]
+
             if vurl !="":
                 print(downloadpath[0])
                 self.downloadytvideo(vurl,svqulity)
@@ -557,7 +577,7 @@ class Ui_Form(object):
             item = model.item(i)
             if item.text() == vdeoname:
                 model.item(i).setBackground(brush)
-                print("seting color to list viewer items")
+                #print("seting color to list viewer items")
                 model.item(i).setText(str(vdeoname)+" download finished")
     #unused            
     def downloadytvideocall(self,url,videoqulity):
@@ -605,15 +625,18 @@ class Ui_Form(object):
         print("save list in to HDD")
         print(mydir)
         path =  mydir+"/saves"
-        savefilename = QtWidgets.QFileDialog.getSaveFileName(None, 'Save File',path)               
         if os.path.exists(path)==False:
             print("not exist have to create")  
             os.mkdir(path)
+        savefilename = QtWidgets.QFileDialog.getSaveFileName(None, 'Save File',path)               
+        
+        if(savefilename[0] !=""):
+            savepath = path
+            pickle.dump((videodic,videostate),open(savefilename[0]+".dytd","wb"))
+            print(savefilename[0])
         else:
-            if(savefilename !=""):
-                savepath = path
-                pickle.dump((videodic,videostate),open(savefilename[0]+".dytd","wb"))
-                print(savefilename[0])
+            pickle.dump((videodic,videostate),open(path+".dytd","wb"))
+            print("saving to "+str(path))    
     #this func for do functionly when clicked remove selected button          
     def clk_removeselected(self):
         print("remove selected")
@@ -704,18 +727,32 @@ class Ui_Form(object):
     #this func for stop running thread
     def stoptreads(self):
         print("stoptreads called")
+        
         try:
+            self.thread2.setTerminationEnabled(True)
+            self.thread2.terminate()
             self.thread1.setTerminationEnabled(True)
             self.thread1.terminate()
             d_finished1[0] = True
             self.progressBar.setValue(0)
             self.label.setText("Stoped")
-        except Exception as e:
+        except AttributeError:
+            try:    
+                self.thread1.setTerminationEnabled(True)
+                self.thread1.terminate()
+                d_finished1[0] = True
+                self.progressBar.setValue(0)
+                self.label.setText("Stoped")
+            except:
+                print("no threads") 
+
+           
+        '''except Exception as e:
             traceback.print_exc()
             print(e)
             errorexct[0] = str(e)
             print(errorexct)
-            self.errorpopup(str(errorexct))
+            self.errorpopup(str(errorexct))'''
     #this func for get qulitys in paseted video
     def getvideosinstreamscall(self):
         print("getting video qulitys")
@@ -739,7 +776,7 @@ class Ui_Form(object):
         self.savelist.setText(_translate("Form", "Save List"))
         self.loadlistinhdd.setText(_translate("Form", "Load List"))
         self.removeselecteditems.setText(_translate("Form", "Remove selected"))
-        self.stopevents.setText(_translate("Frame", "Stop Events"))
+        self.stopevents.setText(_translate("Frame", "Stop"))
         #self.selectall.setText(_translate("Form", "Select All"))
         Form.setStyleSheet("border: 1px solid black;"+"background-color: Black;")
 
