@@ -122,6 +122,7 @@ class getvideoqultys_tread(QtCore.QThread):
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
     callerror = QtCore.pyqtSignal(str)
+    suicidefunc = QtCore.pyqtSignal()
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
         self.url = url
@@ -132,13 +133,16 @@ class dowload_selected_tread(QtCore.QThread):
     def run(self):
         
         if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
-                downloadpath[0] = customdownloadpathstr[0]
-                print("usecustom path "+ downloadpath[0])
+            downloadpath[0] = customdownloadpathstr[0]
+            print("usecustom path "+ downloadpath[0])
         elif askeverytime[0]== "true":
                 #downloadpath.clear()
             downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
             if downpath1 != "":
                 downloadpath[0] = downpath1
+            else:
+                print("canceled") 
+                self.suicidefunc.emit()   
             print("downloadpath is "+ downloadpath[0])
         elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
             if not(os.path.exists(downloadpath[0])):
@@ -255,8 +259,8 @@ class video_dowload_tread(QtCore.QThread):
         except:
             traceback.print_exc()
             try:
-                print("reslution fix area")
-                self.video = yt.streams.filter(adaptive=True).get_highest_resolution()
+                print("selected quality not available in video.going to download highest res available")
+                self.video = yt.streams.filter(progressive=True).get_highest_resolution()
                 self.video.download(downloadpath[0])
             except Exception as e:
                 print(str(e))
@@ -503,6 +507,7 @@ class Ui_Form(object):
         self.thread2.start()
         self.thread2.calldowloadvideo.connect(self.downloadytvideo)
         self.thread2.callerror.connect(self.errorpopup)
+        self.thread2.suicidefunc.connect(self.stoptreads)
     #this func for do functionly when clicked download video button
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
