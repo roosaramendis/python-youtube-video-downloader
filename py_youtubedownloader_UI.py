@@ -242,7 +242,7 @@ class video_dowload_tread(QtCore.QThread):
             print(type(self.qlty))
             if type(self.qlty) == int:
                 self.video = yt.streams.filter(adaptive=True).get_by_itag(self.qlty)
-                self.audio = yt.streams.filter(only_audio=True).first()
+                self.audio = yt.streams.filter(only_audio=True).get_highest_resolution()
             else:     
                 self.video = yt.streams.filter(progressive=True).get_by_resolution(self.qlty)
             print(downloadpath[0])
