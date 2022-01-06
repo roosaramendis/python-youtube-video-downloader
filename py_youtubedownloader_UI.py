@@ -148,7 +148,7 @@ class dowload_selected_tread(QtCore.QThread):
             if not(os.path.exists(downloadpath[0])):
                 os.makedirs(mydir+"/videos")
 
-            downloadpath[0] = [mydir+"/videos"]
+            downloadpath[0] = mydir+"/videos"
         for vname in selectedvideos:
             print("dfinished "+str(d_finished1[0]))
             if videostate.get(vname) == "q" or videostate.get(vname) == "error":
@@ -242,7 +242,7 @@ class video_dowload_tread(QtCore.QThread):
             print(type(self.qlty))
             if type(self.qlty) == int:
                 self.video = yt.streams.filter(adaptive=True).get_by_itag(self.qlty)
-                self.audio = yt.streams.filter(only_audio=True).get_highest_resolution()
+                self.audio = yt.streams.filter(only_audio=True).first()
             else:     
                 self.video = yt.streams.filter(progressive=True).get_by_resolution(self.qlty)
             print(downloadpath[0])
@@ -557,7 +557,7 @@ class Ui_Form(object):
                 if not(os.path.exists(downloadpath[0])):
                     os.makedirs(mydir+"/videos")
 
-                downloadpath[0] = [mydir+"/videos"]
+                downloadpath[0] = mydir+"/videos"
 
             if vurl !="":
                 print(downloadpath[0])

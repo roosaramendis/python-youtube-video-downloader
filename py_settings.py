@@ -173,11 +173,15 @@ class Ui_Frame(object):
     def askeverytime_clk(self):
        if self.askevertime.isChecked():
            askeverytime[0] = True
+           self.usecustomeDpath.setChecked(False)
+           usecustomedowpath[0] = False
        else:
            askeverytime[0] = False   
     def usecustomedownpath_clk(self):
         if self.usecustomeDpath.isChecked():
             usecustomedowpath[0] = True
+            self.askevertime.setChecked(False)
+            askeverytime[0] = False
             print(str(self.usecustomeDpath.isChecked()))
         else:
             usecustomedowpath[0] = False      
