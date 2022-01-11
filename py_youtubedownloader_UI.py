@@ -12,6 +12,7 @@
 
 #__________imports_______________
 from logging import exception
+from sys import version
 from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QInputDialog,QErrorMessage
@@ -70,6 +71,8 @@ global errorexct # to save error exception as string list
 errorexct = [""]
 global vqultybyitagdic # to save video qulity as a key and itag as value
 vqultybyitagdic = {}
+global buttonslist
+buttonslist = []
 #.......................................................
 
 # class for get qualitys in vided
@@ -77,6 +80,7 @@ class getvideoqultys_tread(QtCore.QThread):
 
     setqltycombobox = QtCore.pyqtSignal(list)
     callerror = QtCore.pyqtSignal(str)
+    buttonstates = QtCore.pyqtSignal(bool,int)
     def __init__(self,url, parent=None):
         super(getvideoqultys_tread,self).__init__(parent)
         self.url = url
@@ -113,16 +117,19 @@ class getvideoqultys_tread(QtCore.QThread):
                     print(vqultydic)
                     print(type(itagstr)) 
                     self.setqltycombobox.emit(stlistforcombo)
+                    self.buttonstates.emit(True,2)
                     
         except:
             #errorexct[0] = str(e)
-            self.callerror.emit(str(errorexct))    
+            self.callerror.emit(str(errorexct))
+            self.buttonstates.emit(True,2)    
 
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
     callerror = QtCore.pyqtSignal(str)
     suicidefunc = QtCore.pyqtSignal()
+    buttonstates = QtCore.pyqtSignal(bool,int)
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
         self.url = url
@@ -131,7 +138,7 @@ class dowload_selected_tread(QtCore.QThread):
         link = videodic.get(videoname)    
         return link
     def run(self):
-        
+        self.buttonstates.emit(False,0)
         if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
             downloadpath[0] = customdownloadpathstr[0]
             print("usecustom path "+ downloadpath[0])
@@ -187,6 +194,7 @@ class dowload_selected_tread(QtCore.QThread):
                     print(str(e))
                     errorexct[0] = str(e)
                     self.callerror.emit(str(errorexct))
+                    self.buttonstates.emit(True,0)
 
                     try:
                         videostate[str(self.video.title)] = "error" 
@@ -196,17 +204,20 @@ class dowload_selected_tread(QtCore.QThread):
                         print(str(e))
                         errorexct[0] = str(e)
                         self.callerror.emit(str(errorexct))
+                        self.buttonstates.emit(True,0)
 
             elif videostate.get(vname) == "downloading":
                 print("dowloading")
 
             elif videostate.get(vname) == "downlaaded":
                 print ('video downloaded')
+        self.buttonstates.emit(True,0)
 # class for download videos in another tread
 class video_dowload_tread(QtCore.QThread):
     change_value = QtCore.pyqtSignal(int,str)
     finishvname = QtCore.pyqtSignal(str)
     callerror = QtCore.pyqtSignal(str)
+    buttonstates = QtCore.pyqtSignal(bool,int)
     def __init__(self,url, qulity, parent=None):
         super(video_dowload_tread,self).__init__(parent)
         self.yturl = url
@@ -232,6 +243,7 @@ class video_dowload_tread(QtCore.QThread):
         def finishedfunc(stream,filepath):
             self.finishvname.emit(str(self.video.title))
             d_finished1[0] = True
+            self.buttonstates.emit(True,1)
         
         try:
             d_finished1[0] = False
@@ -265,7 +277,8 @@ class video_dowload_tread(QtCore.QThread):
             except Exception as e:
                 print(str(e))
                 errorexct[0] = str(e)
-                self.callerror.emit(str(errorexct))                           
+                self.callerror.emit(str(errorexct))
+                self.buttonstates.emit(True,1)                           
 #class for UI defenitions and setting up
 class Ui_Form(object):
     pp = 0
@@ -342,6 +355,7 @@ class Ui_Form(object):
         self.pb_downloadselected.setToolTip(" this is for download only selected videos (this will able to download a playlist or multiple playlists)")
         self.pb_downloadselected.clicked.connect(self.clk_downloadselectedcall)
         self.pb_downloadselected.setStyleSheet(self.commenstyle)
+        
         #.......................................................................
 
         #____________setup of settings button_______________________
@@ -389,7 +403,7 @@ class Ui_Form(object):
         self.removeselecteditems = QtWidgets.QPushButton(Form)
         self.removeselecteditems.setObjectName(u"removeselecteditems")
         self.removeselecteditems.setGeometry(QtCore.QRect(170, 120, 91, 23))
-        self.removeselecteditems.setToolTip(" you can use selected video from list")
+        self.removeselecteditems.setToolTip(" you can remove selected video from list")
         self.removeselecteditems.setStyleSheet(self.commenstyle)
         self.removeselecteditems.clicked.connect(self.clk_removeselected)
         #..................................................................
@@ -411,7 +425,10 @@ class Ui_Form(object):
         self.stopevents.setStyleSheet(self.commenstyle)
         #.................................................
         self.msgbox = QtWidgets.QMessageBox(Form)
-        
+        self.versionf = open("version.txt","r")
+        self.version = self.versionf.readline() 
+        for i in [self.pb_downloadselected,self.pb_downloadvideo,self.pb_addurl]:
+            buttonslist.append(i) 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
     #this func for get keys of videodic dictionary and return list of keys
@@ -500,7 +517,7 @@ class Ui_Form(object):
         except:
             traceback.print_exc()
             print("empty list")
-        
+        self.label.setText("download started")
         yturl = "self.getvideolink(vname)"
         vqulity = self.CB_vqulity.currentText()
         self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
@@ -508,6 +525,7 @@ class Ui_Form(object):
         self.thread2.calldowloadvideo.connect(self.downloadytvideo)
         self.thread2.callerror.connect(self.errorpopup)
         self.thread2.suicidefunc.connect(self.stoptreads)
+        self.thread2.buttonstates.connect(self.setbuttonstate)
     #this func for do functionly when clicked download video button
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
@@ -585,6 +603,8 @@ class Ui_Form(object):
         t1.start()
     #this func for call video download thread
     def downloadytvideo(self,url,videoqulity):
+        self.setbuttonstate(False,1)
+        self.label.setText("download started")
         self.thread1 = video_dowload_tread(url= url,qulity= videoqulity)
         
         
@@ -592,6 +612,7 @@ class Ui_Form(object):
         self.thread1.change_value.connect(self.setProgressVal)
         self.thread1.finishvname.connect(self.downfineshscallback)
         self.thread1.callerror.connect(self.errorpopup)
+        self.thread1.buttonstates.connect(self.setbuttonstate)
     #this func for do things after download finished
     def downfineshscallback(self,finishvnam):
         print("download finished "+ finishvnam)
@@ -735,6 +756,7 @@ class Ui_Form(object):
             self.thread1.terminate()
             d_finished1[0] = True
             self.progressBar.setValue(0)
+            self.setbuttonstate(True,0)
             self.label.setText("Stoped")
         except AttributeError:
             try:    
@@ -742,6 +764,7 @@ class Ui_Form(object):
                 self.thread1.terminate()
                 d_finished1[0] = True
                 self.progressBar.setValue(0)
+                self.setbuttonstate(True,1)
                 self.label.setText("Stoped")
             except:
                 print("no threads") 
@@ -756,19 +779,25 @@ class Ui_Form(object):
     #this func for get qulitys in paseted video
     def getvideosinstreamscall(self):
         print("getting video qulitys")
+        self.setbuttonstate(False,2)
         self.thread1 = getvideoqultys_tread(url=str(self.LE_ulr.text()))
 
         self.thread1.start()
         self.thread1.setqltycombobox.connect(self.setqcombobox)
         self.thread1.callerror.connect(self.errorpopup)
+        self.thread1.buttonstates.connect(self.setbuttonstate)
     #this func for set combobox list
     def setqcombobox(self,qltylist):
 
         self.CB_vqulity.addItems(qltylist)
-    
+    #this func for set buttons enable or disable
+    def setbuttonstate(self,buttonstate,buttonindex):
+        print("setbutton enable or disable")
+        buttonslist[buttonindex].setEnabled(buttonstate)
+
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT DOWNLOADER"))
+        Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT VIDEO DOWNLOADER "+str(self.version)))
         self.pb_addurl.setText(_translate("Form", "Add Video"))
         self.pb_downloadvideo.setText(_translate("Form", "Download Video"))
         self.pb_downloadselected.setText(_translate("Form", "Download Selected"))

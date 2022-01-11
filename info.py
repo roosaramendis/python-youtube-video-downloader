@@ -10,6 +10,7 @@
 #created by: sidhas roosara mendis (DRAGON) 
 #github link:
 
+from sys import version
 from PyQt5 import QtCore, QtGui, QtWidgets
 import webbrowser
 
@@ -25,13 +26,15 @@ class Ui_Frame(object):
         self.info = QtWidgets.QLabel(Frame)
         self.info.setGeometry(QtCore.QRect(30, 30, 261, 171))
         self.info.setObjectName("info")
+        self.info.scroll(300,0)
         self.info.setStyleSheet(commenstyle)
         self.checkupdate = QtWidgets.QPushButton(Frame)
         self.checkupdate.setGeometry(QtCore.QRect(30, 210, 75, 23))
         self.checkupdate.setObjectName("checkupdate")
         self.checkupdate.setStyleSheet(commenstyle)
         self.checkupdate.clicked.connect(self.openurl)
-
+        self.versionf = open("version.txt","r")
+        self.version = self.versionf.readline() 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
 
@@ -41,7 +44,7 @@ class Ui_Frame(object):
     def retranslateUi(self, Frame):
         _translate = QtCore.QCoreApplication.translate
         Frame.setWindowTitle(_translate("Frame", "info"))
-        self.info.setText(_translate("Frame", "<html><head/><body><p>created by roosara mendis</p><p><br/></p><p>software version :- Test 1</p><p><br/></p><p>web :- https://github.com/roosaramendis/python-youtube-video-downloader</p></body></html>"))
+        self.info.setText(_translate("Frame", ("<html><head/><body><p>created by roosara mendis</p><p><br/></p><p>software version :- ")+str(self.version)+("</p><p><br/></p><p>web :- https://github.com/roosaramendis/python-youtube-video-downloader</p></body></html>")))
         self.checkupdate.setText(_translate("Frame", "check update"))
 
 
