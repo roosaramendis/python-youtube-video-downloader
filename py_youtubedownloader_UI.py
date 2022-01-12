@@ -81,7 +81,7 @@ class getvideoqultys_tread(QtCore.QThread):
     setqltycombobox = QtCore.pyqtSignal(list)
     callerror = QtCore.pyqtSignal(str)
     buttonstates = QtCore.pyqtSignal(bool,int)
-    suicidefunc = QtCore.pyqtSignal()
+    suicidefunc = QtCore.pyqtSignal(str)
     def __init__(self,url, parent=None):
         super(getvideoqultys_tread,self).__init__(parent)
         self.url = url
@@ -119,12 +119,13 @@ class getvideoqultys_tread(QtCore.QThread):
                     print(type(itagstr)) 
                     self.setqltycombobox.emit(stlistforcombo)
                     self.buttonstates.emit(True,2)
-                    self.suicidefunc.emit()
+                    self.suicidefunc.emit("video qualities successfully loaded")
                     
         except:
             #errorexct[0] = str(e)
             self.callerror.emit(str(errorexct))
-            self.buttonstates.emit(True,2)    
+            self.buttonstates.emit(True,2)
+            self.suicidefunc.emit("error occurred while loading video qualities")    
 
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
@@ -516,38 +517,39 @@ class Ui_Form(object):
     def clk_downloadselectedcall(self):
         try:
             self.getcheckditems(model)
+        
+        
+            yturl = "self.getvideolink(vname)"
+            vqulity = self.CB_vqulity.currentText()
+            if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
+                downloadpath[0] = customdownloadpathstr[0]
+                print("usecustom path "+ downloadpath[0])
+            elif askeverytime[0]== "true":
+                    #downloadpath.clear()
+                downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
+                if downpath1 != "":
+                    downloadpath[0] = downpath1
+                else:
+                    print("download canceled")
+                    downloadpath[0] = "" 
+                    
+                print("downloadpath is "+ downloadpath[0])
+            elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
+                if not(os.path.exists(downloadpath[0])):
+                    os.makedirs(mydir+"/videos")
+
+                downloadpath[0] = mydir+"/videos"
+            if downloadpath[0] != "":
+                self.label.setText("download started")    
+                self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
+                self.thread2.start()
+                self.thread2.calldowloadvideo.connect(self.downloadytvideo)
+                self.thread2.callerror.connect(self.errorpopup)
+                self.thread2.suicidefunc.connect(self.stoptreads)
+                self.thread2.buttonstates.connect(self.setbuttonstate)
         except:
             traceback.print_exc()
-            print("empty list")
-        
-        yturl = "self.getvideolink(vname)"
-        vqulity = self.CB_vqulity.currentText()
-        if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
-            downloadpath[0] = customdownloadpathstr[0]
-            print("usecustom path "+ downloadpath[0])
-        elif askeverytime[0]== "true":
-                #downloadpath.clear()
-            downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
-            if downpath1 != "":
-                downloadpath[0] = downpath1
-            else:
-                print("download canceled")
-                downloadpath[0] = "" 
-                   
-            print("downloadpath is "+ downloadpath[0])
-        elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
-            if not(os.path.exists(downloadpath[0])):
-                os.makedirs(mydir+"/videos")
-
-            downloadpath[0] = mydir+"/videos"
-        if downloadpath[0] != "":
-            self.label.setText("download started")    
-            self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
-            self.thread2.start()
-            self.thread2.calldowloadvideo.connect(self.downloadytvideo)
-            self.thread2.callerror.connect(self.errorpopup)
-            self.thread2.suicidefunc.connect(self.stoptreads)
-            self.thread2.buttonstates.connect(self.setbuttonstate)
+            print("empty list")    
     #this func for do functionly when clicked download video button
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
@@ -771,7 +773,7 @@ class Ui_Form(object):
         self.errmsg.showMessage(str(errorexct))
         d_finished1[0] = True
     #this func for stop running thread
-    def stoptreads(self):
+    def stoptreads(self,msg = "stopped"):
         print("stoptreads called")
         
         try:
@@ -782,7 +784,7 @@ class Ui_Form(object):
             d_finished1[0] = True
             self.progressBar.setValue(0)
             self.setbuttonstate(True,0)
-            self.label.setText("Stoped")
+            self.label.setText(msg)
         except AttributeError:
             try:    
                 self.thread1.setTerminationEnabled(True)
@@ -790,7 +792,7 @@ class Ui_Form(object):
                 d_finished1[0] = True
                 self.progressBar.setValue(0)
                 self.setbuttonstate(True,1)
-                self.label.setText("Stoped")
+                self.label.setText(msg)
             except:
                 print("no threads") 
 
