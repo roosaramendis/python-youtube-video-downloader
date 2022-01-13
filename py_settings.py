@@ -77,7 +77,7 @@ class Ui_Frame(object):
         self.usecustomeDpath.setToolTip("for use custome download path")
         if usecustomedowpath[0] == "true":
             self.usecustomeDpath.setChecked(True)
-            self.askevertime.setChecked(False)
+            #self.askevertime.setChecked(False)
         self.usecustomeDpath.stateChanged.connect(self.usecustomedownpath_clk)
         self.dpathlable = QtWidgets.QLabel(Frame)
         self.dpathlable.setGeometry(QtCore.QRect(40, 90, 501, 20))

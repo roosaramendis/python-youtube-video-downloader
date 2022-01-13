@@ -81,7 +81,7 @@ class getvideoqultys_tread(QtCore.QThread):
     setqltycombobox = QtCore.pyqtSignal(list)
     callerror = QtCore.pyqtSignal(str)
     buttonstates = QtCore.pyqtSignal(bool,int)
-    suicidefunc = QtCore.pyqtSignal(str)
+    suicidefunc = QtCore.pyqtSignal(bool,str)
     def __init__(self,url, parent=None):
         super(getvideoqultys_tread,self).__init__(parent)
         self.url = url
@@ -95,6 +95,7 @@ class getvideoqultys_tread(QtCore.QThread):
             if self.url !="":
                 if(re.search("playlist",self.url)):
                     print("its playlist")
+                    self.buttonstates.emit(True,2)
                 else:
                     q = YouTube(str(self.url))
                     for s in q.streams.filter(adaptive=True):
@@ -119,19 +120,19 @@ class getvideoqultys_tread(QtCore.QThread):
                     print(type(itagstr)) 
                     self.setqltycombobox.emit(stlistforcombo)
                     self.buttonstates.emit(True,2)
-                    self.suicidefunc.emit("video qualities successfully loaded")
+                    self.suicidefunc.emit(False,"video qualities successfully loaded")
                     
         except:
             #errorexct[0] = str(e)
             self.callerror.emit(str(errorexct))
             self.buttonstates.emit(True,2)
-            self.suicidefunc.emit("error occurred while loading video qualities")    
+            self.suicidefunc.emit(False,"error occurred while loading video qualities")    
 
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
     callerror = QtCore.pyqtSignal(str)
-    suicidefunc = QtCore.pyqtSignal()
+    suicidefunc = QtCore.pyqtSignal(bool,str)
     buttonstates = QtCore.pyqtSignal(bool,int)
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
@@ -773,8 +774,8 @@ class Ui_Form(object):
         self.errmsg.showMessage(str(errorexct))
         d_finished1[0] = True
     #this func for stop running thread
-    def stoptreads(self,msg = "stopped"):
-        print("stoptreads called")
+    def stoptreads(self,clickedbool = False,msg = "stopped"):
+        print(msg)
         
         try:
             self.thread2.setTerminationEnabled(True)
@@ -784,6 +785,7 @@ class Ui_Form(object):
             d_finished1[0] = True
             self.progressBar.setValue(0)
             self.setbuttonstate(True,0)
+            self.setbuttonstate(True,1)
             self.label.setText(msg)
         except AttributeError:
             try:    
