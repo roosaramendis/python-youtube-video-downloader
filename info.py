@@ -10,7 +10,7 @@
 #created by: sidhas roosara mendis (DRAGON) 
 #github link:
 
-from sys import version
+#from sys import version
 from PyQt5 import QtCore, QtGui, QtWidgets
 import webbrowser
 

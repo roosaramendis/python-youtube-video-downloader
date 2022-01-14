@@ -12,7 +12,7 @@
 
 #__________imports_______________
 from logging import exception
-from sys import version
+#from sys import version
 from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QInputDialog,QErrorMessage
@@ -127,7 +127,6 @@ class getvideoqultys_tread(QtCore.QThread):
             self.callerror.emit(str(errorexct))
             self.buttonstates.emit(True,2)
             self.suicidefunc.emit(False,"error occurred while loading video qualities")    
-
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
@@ -143,23 +142,6 @@ class dowload_selected_tread(QtCore.QThread):
         return link
     def run(self):
         self.buttonstates.emit(False,0)
-        '''if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
-            downloadpath[0] = customdownloadpathstr[0]
-            print("usecustom path "+ downloadpath[0])
-        elif askeverytime[0]== "true":
-                #downloadpath.clear()
-            downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
-            if downpath1 != "":
-                downloadpath[0] = downpath1
-            else:
-                print("canceled") 
-                self.suicidefunc.emit()   
-            print("downloadpath is "+ downloadpath[0])
-        elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
-            if not(os.path.exists(downloadpath[0])):
-                os.makedirs(mydir+"/videos")
-
-            downloadpath[0] = mydir+"/videos"'''
         for vname in selectedvideos:
             print("dfinished "+str(d_finished1[0]))
             if videostate.get(vname) == "q" or videostate.get(vname) == "error":
@@ -689,8 +671,19 @@ class Ui_Form(object):
     #this func for do functionly when clicked remove selected button          
     def clk_removeselected(self):
         print("remove selected")
-        '''try:'''
-        self.getcheckditems(model)
+        lvselecteditemsindex = []
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.checkState() == QtCore.Qt.Checked:
+                
+                lvselecteditemsindex.append(item.row())
+        print(lvselecteditemsindex)        
+        for i in lvselecteditemsindex:
+            item = model.takeItem(i)
+            model.removeRow(i)
+            del item
+              
+        '''self.getcheckditems(model)
         print(selectedvideos)
         for i in selectedvideos:
             print(i + str("fsafas"))
@@ -702,9 +695,7 @@ class Ui_Form(object):
             else:        
                 print(str(i)+"removed")
         self.listviwer(videodic)
-        selectedvideos.clear()
-        """except:
-            print("empty")"""
+        selectedvideos.clear()'''
     #this func for do functionly when clicked load button
     def clk_loadlistinhdd(self):
         path =  mydir+"/saves"
