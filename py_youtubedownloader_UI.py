@@ -12,6 +12,7 @@
 
 #__________imports_______________
 from logging import exception
+
 #from sys import version
 from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -674,14 +675,19 @@ class Ui_Form(object):
         lvselecteditemsindex = []
         for index in range(model.rowCount()):
             item = model.item(index)
-            if item.checkState() == QtCore.Qt.Checked:
+            if item != None:
+                if item.checkState() == QtCore.Qt.Checked:
                 
-                lvselecteditemsindex.append(item.row())
+                    lvselecteditemsindex.append(item.row())
+                    item1 = model.takeItem(index)
+                    model.removeRow(index)
+                    del item1
+                    time.sleep(0.01)
         print(lvselecteditemsindex)        
-        for i in lvselecteditemsindex:
+        '''for i in lvselecteditemsindex:
             item = model.takeItem(i)
             model.removeRow(i)
-            del item
+            del item'''
               
         '''self.getcheckditems(model)
         print(selectedvideos)
