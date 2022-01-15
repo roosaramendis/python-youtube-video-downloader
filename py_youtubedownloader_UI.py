@@ -847,7 +847,7 @@ class Ui_Form(object):
     #this func for get notification
     def nitificatonfunc(self,msg):
         notification.notify(
-            title = "HEADING HERE",
+            title = "Download Finished",
             message= msg ,
             timeout=2
         )
