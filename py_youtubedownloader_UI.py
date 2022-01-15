@@ -14,7 +14,7 @@
 from logging import exception
 #from plyer import notification
 #from sys import version
-from typing import ParamSpecArgs
+#from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QInputDialog,QErrorMessage
 from PyQt5.QtCore import QSettings
