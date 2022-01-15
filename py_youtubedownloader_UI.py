@@ -846,12 +846,14 @@ class Ui_Form(object):
         buttonslist[buttonindex].setEnabled(buttonstate)
     #this func for get notification
     def nitificatonfunc(self,msg):
-        notification.notify(
-            title = "Download Finished",
-            message= msg ,
-            timeout=2
-        )
-
+        try:
+            notification.notify(
+                title = "Download Finished",
+                message= msg ,
+                timeout=1
+            )
+        except:
+            pass
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT VIDEO DOWNLOADER "+str(self.version)))

@@ -68,6 +68,10 @@
   {
    "optionDest": "datas",
    "value": "C:/Users/mendis/Documents/GitHub/python-youtube-video-downloader/version.txt;."
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "plyer.platforms.win.notification"
   }
  ],
  "nonPyinstallerOptions": {
