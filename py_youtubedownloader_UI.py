@@ -12,7 +12,7 @@
 
 #__________imports_______________
 from logging import exception
-#from plyer import notification
+from plyer import notification
 #from sys import version
 #from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -846,11 +846,11 @@ class Ui_Form(object):
         buttonslist[buttonindex].setEnabled(buttonstate)
     #this func for get notification
     def nitificatonfunc(self,msg):
-        '''notification.notify(
+        notification.notify(
             title = "Download Finished",
             message= msg ,
             timeout=2
-        )'''
+        )
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
