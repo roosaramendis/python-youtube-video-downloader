@@ -12,6 +12,7 @@
 
 #__________imports_______________
 from logging import exception
+from tkinter.tix import Tree
 
 #from sys import version
 from typing import ParamSpecArgs
@@ -673,17 +674,38 @@ class Ui_Form(object):
     def clk_removeselected(self):
         print("remove selected")
         lvselecteditemsindex = []
+        noneitemlist = []
         for index in range(model.rowCount()):
             item = model.item(index)
             if item != None:
                 if item.checkState() == QtCore.Qt.Checked:
-                
                     lvselecteditemsindex.append(item.row())
-                    item1 = model.takeItem(index)
-                    model.removeRow(index)
+                    item1 = model.takeItem(item.row())
                     del item1
-                    time.sleep(0.01)
-        print(lvselecteditemsindex)        
+                    print(str(index)+str(item)+str(item.text()))
+                    time.sleep(0.05)
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item == None:            
+                print("have a none item ")
+                noneitemlist.append(index)
+        print(noneitemlist)
+        icrindex = 0            
+        while 0 < len(noneitemlist):
+            icrindex+=1
+            print(str(icrindex))
+            for iindex in range(model.rowCount()):
+                item = model.item(iindex)
+                print(str(iindex))
+                print(iindex)
+                if item == None:
+                    print(str(index)+"none")
+                    if model.removeRow(iindex) == True:
+                        try:
+                            noneitemlist.pop()
+                        except:
+                            pass    
+                
         '''for i in lvselecteditemsindex:
             item = model.takeItem(i)
             model.removeRow(i)
