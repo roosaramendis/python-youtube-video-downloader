@@ -12,8 +12,7 @@
 
 #__________imports_______________
 from logging import exception
-from tkinter.tix import Tree
-
+from plyer import notification
 #from sys import version
 from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -135,6 +134,7 @@ class dowload_selected_tread(QtCore.QThread):
     callerror = QtCore.pyqtSignal(str)
     suicidefunc = QtCore.pyqtSignal(bool,str)
     buttonstates = QtCore.pyqtSignal(bool,int)
+    notify = QtCore.pyqtSignal(str)
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
         self.url = url
@@ -200,6 +200,7 @@ class dowload_selected_tread(QtCore.QThread):
             elif videostate.get(vname) == "downlaaded":
                 print ('video downloaded')
         self.buttonstates.emit(True,0)
+        self.notify.emit("List Download Finished")
 # class for download videos in another tread
 class video_dowload_tread(QtCore.QThread):
     change_value = QtCore.pyqtSignal(int,str)
@@ -532,6 +533,7 @@ class Ui_Form(object):
                 self.thread2.callerror.connect(self.errorpopup)
                 self.thread2.suicidefunc.connect(self.stoptreads)
                 self.thread2.buttonstates.connect(self.setbuttonstate)
+                self.thread2.notify.connect(self.nitificatonfunc)
         except:
             traceback.print_exc()
             print("empty list")    
@@ -607,8 +609,7 @@ class Ui_Form(object):
             item = model.item(i)
             if item.text() == vdeoname:
                 model.item(i).setBackground(brush)
-                #print("seting color to list viewer items")
-                model.item(i).setText(str(vdeoname)+" download finished")
+                model.item(i).setText(str(vdeoname)+" ✅")
     #unused            
     def downloadytvideocall(self,url,videoqulity):
         t1 = Thread(target=self.downloadytvideo,args=(url,videoqulity))
@@ -636,18 +637,6 @@ class Ui_Form(object):
         videostate[finishvnam] = "downloaded"
         #d_finished1 = True
         d_finished1[0] = True
-        '''try:
-            self.thread1.setTerminationEnabled(True)
-            self.thread1.terminate()
-            d_finished1[0] = True
-            self.progressBar.setValue(0)
-            #self.label.setText("Stoped")
-        except Exception as e:
-            traceback.print_exc()
-            print(e)
-            errorexct[0] = str(e)
-            print(errorexct)
-            self.errorpopup(str(errorexct))'''
     #this func for set proggres bar value
     def setProgressVal(self,prval,downloadspeed):
         print(str(prval)+" %")
@@ -675,12 +664,14 @@ class Ui_Form(object):
         print("remove selected")
         lvselecteditemsindex = []
         noneitemlist = []
+        removeditemslist = []
         for index in range(model.rowCount()):
             item = model.item(index)
             if item != None:
                 if item.checkState() == QtCore.Qt.Checked:
                     lvselecteditemsindex.append(item.row())
                     item1 = model.takeItem(item.row())
+                    removeditemslist.append(item1.text())
                     del item1
                     print(str(index)+str(item)+str(item.text()))
                     time.sleep(0.05)
@@ -705,7 +696,17 @@ class Ui_Form(object):
                             noneitemlist.pop()
                         except:
                             pass    
-                
+        for i in removeditemslist:
+            if i in keyslist:
+                videodic.pop(i)
+            else:
+                if "✅" in i:
+                    print("its downloaded video")
+                    newi = i.strip("✅")
+                    print(newi)    
+                    if newi in keyslist:
+                        videodic.pop(newi)
+        print(videodic)                
         '''for i in lvselecteditemsindex:
             item = model.takeItem(i)
             model.removeRow(i)
@@ -843,6 +844,13 @@ class Ui_Form(object):
     def setbuttonstate(self,buttonstate,buttonindex):
         print("setbutton enable or disable")
         buttonslist[buttonindex].setEnabled(buttonstate)
+    #this func for get notification
+    def nitificatonfunc(self,msg):
+        notification.notify(
+            title = "HEADING HERE",
+            message= msg ,
+            timeout=2
+        )
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
