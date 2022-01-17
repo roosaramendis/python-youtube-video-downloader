@@ -661,70 +661,57 @@ class Ui_Form(object):
             print("saving to "+str(path))    
     #this func for do functionly when clicked remove selected button          
     def clk_removeselected(self):
-        print("remove selected")
-        lvselecteditemsindex = []
-        noneitemlist = []
-        removeditemslist = []
-        for index in range(model.rowCount()):
-            item = model.item(index)
-            if item != None:
-                if item.checkState() == QtCore.Qt.Checked:
-                    lvselecteditemsindex.append(item.row())
-                    item1 = model.takeItem(item.row())
-                    removeditemslist.append(item1.text())
-                    del item1
-                    print(str(index)+str(item)+str(item.text()))
-                    time.sleep(0.05)
-        for index in range(model.rowCount()):
-            item = model.item(index)
-            if item == None:            
-                print("have a none item ")
-                noneitemlist.append(index)
-        print(noneitemlist)
-        icrindex = 0            
-        while 0 < len(noneitemlist):
-            icrindex+=1
-            print(str(icrindex))
-            for iindex in range(model.rowCount()):
-                item = model.item(iindex)
-                print(str(iindex))
-                print(iindex)
-                if item == None:
-                    print(str(index)+"none")
-                    if model.removeRow(iindex) == True:
-                        try:
-                            noneitemlist.pop()
-                        except:
-                            pass    
-        for i in removeditemslist:
-            if i in keyslist:
-                videodic.pop(i)
-            else:
-                if "✅" in i:
+        try:
+            print("remove selected")
+            lvselecteditemsindex = []
+            noneitemlist = []
+            removeditemslist = []
+            for index in range(model.rowCount()):
+                item = model.item(index)
+                if item != None:
+                    if item.checkState() == QtCore.Qt.Checked:
+                        lvselecteditemsindex.append(item.row())
+                        item1 = model.takeItem(item.row())
+                        removeditemslist.append(item1.text())
+                        del item1
+                        print(str(index)+str(item)+str(item.text()))
+                        time.sleep(0.05)
+            for index in range(model.rowCount()):
+                item = model.item(index)
+                if item == None:            
+                    print("have a none item ")
+                    noneitemlist.append(index)
+            print(noneitemlist)
+            icrindex = 0            
+            while 0 < len(noneitemlist):
+                icrindex+=1
+                print(str(icrindex))
+                for iindex in range(model.rowCount()):
+                    item = model.item(iindex)
+                    print(str(iindex))
+                    print(iindex)
+                    if item == None:
+                        print(str(index)+"none")
+                        if model.removeRow(iindex) == True:
+                            try:
+                                noneitemlist.pop()
+                            except:
+                                pass    
+            for i in removeditemslist:
+                if i in videodic.keys():
+                    videodic.pop(i)
+                elif "✅" in i:
                     print("its downloaded video")
-                    newi = i.strip("✅")
-                    print(newi)    
-                    if newi in keyslist:
+                    newi = i.strip(" ✅")
+                    print(newi+"newi")
+                    print(str(videodic.keys()))    
+                    if newi in videodic.keys():
+                        print(newi +" newi in keylist")
                         videodic.pop(newi)
-        print(videodic)                
-        '''for i in lvselecteditemsindex:
-            item = model.takeItem(i)
-            model.removeRow(i)
-            del item'''
-              
-        '''self.getcheckditems(model)
-        print(selectedvideos)
-        for i in selectedvideos:
-            print(i + str("fsafas"))
-            try:    
-                videodic.pop(i)
-            except Exception as e:
-                errorexct[0] = str(e)
-                self.errorpopup(str(errorexct))
-            else:        
-                print(str(i)+"removed")
-        self.listviwer(videodic)
-        selectedvideos.clear()'''
+            print(videodic)
+        except:
+            pass                    
+        
     #this func for do functionly when clicked load button
     def clk_loadlistinhdd(self):
         path =  mydir+"/saves"
