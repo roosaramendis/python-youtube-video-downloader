@@ -25,5 +25,6 @@ used third party libraries
   pytube https://pypi.org/project/pytube/
   pyqt5 https://pypi.org/project/PyQt5/
 
+to fix regexmatcherror change code of  C:\Users\xxxx\AppData\Local\Programs\Python\Python310\lib\site-packages\pytube\chiper.py to this https://github.com/pytube/pytube/pull/1200/files
 
 created by roosara mendis  
