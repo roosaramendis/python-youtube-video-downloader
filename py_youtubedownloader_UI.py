@@ -12,7 +12,9 @@
 
 #__________imports_______________
 from logging import exception
-from typing import ParamSpecArgs
+from plyer import notification
+#from sys import version
+#from typing import ParamSpecArgs
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QInputDialog,QErrorMessage
 from PyQt5.QtCore import QSettings
@@ -70,6 +72,8 @@ global errorexct # to save error exception as string list
 errorexct = [""]
 global vqultybyitagdic # to save video qulity as a key and itag as value
 vqultybyitagdic = {}
+global buttonslist
+buttonslist = []
 #.......................................................
 
 # class for get qualitys in vided
@@ -77,6 +81,8 @@ class getvideoqultys_tread(QtCore.QThread):
 
     setqltycombobox = QtCore.pyqtSignal(list)
     callerror = QtCore.pyqtSignal(str)
+    buttonstates = QtCore.pyqtSignal(bool,int)
+    suicidefunc = QtCore.pyqtSignal(bool,str)
     def __init__(self,url, parent=None):
         super(getvideoqultys_tread,self).__init__(parent)
         self.url = url
@@ -90,6 +96,7 @@ class getvideoqultys_tread(QtCore.QThread):
             if self.url !="":
                 if(re.search("playlist",self.url)):
                     print("its playlist")
+                    self.buttonstates.emit(True,2)
                 else:
                     q = YouTube(str(self.url))
                     for s in q.streams.filter(adaptive=True):
@@ -113,16 +120,21 @@ class getvideoqultys_tread(QtCore.QThread):
                     print(vqultydic)
                     print(type(itagstr)) 
                     self.setqltycombobox.emit(stlistforcombo)
+                    self.buttonstates.emit(True,2)
+                    self.suicidefunc.emit(False,"video qualities successfully loaded")
                     
         except:
             #errorexct[0] = str(e)
-            self.callerror.emit(str(errorexct))    
-
+            self.callerror.emit(str(errorexct))
+            self.buttonstates.emit(True,2)
+            self.suicidefunc.emit(False,"error occurred while loading video qualities")    
 # class for dowload selected video in another tread        
 class dowload_selected_tread(QtCore.QThread):
     calldowloadvideo = QtCore.pyqtSignal(str,str)
     callerror = QtCore.pyqtSignal(str)
-    suicidefunc = QtCore.pyqtSignal()
+    suicidefunc = QtCore.pyqtSignal(bool,str)
+    buttonstates = QtCore.pyqtSignal(bool,int)
+    notify = QtCore.pyqtSignal(str)
     def __init__(self,url, qulity, parent=None):
         super(dowload_selected_tread,self).__init__(parent)
         self.url = url
@@ -131,24 +143,7 @@ class dowload_selected_tread(QtCore.QThread):
         link = videodic.get(videoname)    
         return link
     def run(self):
-        
-        if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
-            downloadpath[0] = customdownloadpathstr[0]
-            print("usecustom path "+ downloadpath[0])
-        elif askeverytime[0]== "true":
-                #downloadpath.clear()
-            downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
-            if downpath1 != "":
-                downloadpath[0] = downpath1
-            else:
-                print("canceled") 
-                self.suicidefunc.emit()   
-            print("downloadpath is "+ downloadpath[0])
-        elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
-            if not(os.path.exists(downloadpath[0])):
-                os.makedirs(mydir+"/videos")
-
-            downloadpath[0] = [mydir+"/videos"]
+        self.buttonstates.emit(False,0)
         for vname in selectedvideos:
             print("dfinished "+str(d_finished1[0]))
             if videostate.get(vname) == "q" or videostate.get(vname) == "error":
@@ -187,6 +182,7 @@ class dowload_selected_tread(QtCore.QThread):
                     print(str(e))
                     errorexct[0] = str(e)
                     self.callerror.emit(str(errorexct))
+                    self.buttonstates.emit(True,0)
 
                     try:
                         videostate[str(self.video.title)] = "error" 
@@ -196,17 +192,21 @@ class dowload_selected_tread(QtCore.QThread):
                         print(str(e))
                         errorexct[0] = str(e)
                         self.callerror.emit(str(errorexct))
+                        self.buttonstates.emit(True,0)
 
             elif videostate.get(vname) == "downloading":
                 print("dowloading")
 
             elif videostate.get(vname) == "downlaaded":
                 print ('video downloaded')
+        self.buttonstates.emit(True,0)
+        self.notify.emit("List Download Finished")
 # class for download videos in another tread
 class video_dowload_tread(QtCore.QThread):
     change_value = QtCore.pyqtSignal(int,str)
     finishvname = QtCore.pyqtSignal(str)
     callerror = QtCore.pyqtSignal(str)
+    buttonstates = QtCore.pyqtSignal(bool,int)
     def __init__(self,url, qulity, parent=None):
         super(video_dowload_tread,self).__init__(parent)
         self.yturl = url
@@ -232,6 +232,7 @@ class video_dowload_tread(QtCore.QThread):
         def finishedfunc(stream,filepath):
             self.finishvname.emit(str(self.video.title))
             d_finished1[0] = True
+            self.buttonstates.emit(True,1)
         
         try:
             d_finished1[0] = False
@@ -265,7 +266,8 @@ class video_dowload_tread(QtCore.QThread):
             except Exception as e:
                 print(str(e))
                 errorexct[0] = str(e)
-                self.callerror.emit(str(errorexct))                           
+                self.callerror.emit(str(errorexct))
+                self.buttonstates.emit(True,1)                           
 #class for UI defenitions and setting up
 class Ui_Form(object):
     pp = 0
@@ -342,6 +344,7 @@ class Ui_Form(object):
         self.pb_downloadselected.setToolTip(" this is for download only selected videos (this will able to download a playlist or multiple playlists)")
         self.pb_downloadselected.clicked.connect(self.clk_downloadselectedcall)
         self.pb_downloadselected.setStyleSheet(self.commenstyle)
+        
         #.......................................................................
 
         #____________setup of settings button_______________________
@@ -389,7 +392,7 @@ class Ui_Form(object):
         self.removeselecteditems = QtWidgets.QPushButton(Form)
         self.removeselecteditems.setObjectName(u"removeselecteditems")
         self.removeselecteditems.setGeometry(QtCore.QRect(170, 120, 91, 23))
-        self.removeselecteditems.setToolTip(" you can use selected video from list")
+        self.removeselecteditems.setToolTip(" you can remove selected video from list")
         self.removeselecteditems.setStyleSheet(self.commenstyle)
         self.removeselecteditems.clicked.connect(self.clk_removeselected)
         #..................................................................
@@ -411,7 +414,10 @@ class Ui_Form(object):
         self.stopevents.setStyleSheet(self.commenstyle)
         #.................................................
         self.msgbox = QtWidgets.QMessageBox(Form)
-        
+        self.versionf = open("version.txt","r")
+        self.version = self.versionf.readline() 
+        for i in [self.pb_downloadselected,self.pb_downloadvideo,self.pb_addurl]:
+            buttonslist.append(i) 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
     #this func for get keys of videodic dictionary and return list of keys
@@ -497,17 +503,40 @@ class Ui_Form(object):
     def clk_downloadselectedcall(self):
         try:
             self.getcheckditems(model)
+        
+        
+            yturl = "self.getvideolink(vname)"
+            vqulity = self.CB_vqulity.currentText()
+            if usecustomedowpath[0] == "true"and customdownloadpathstr[0] !="":
+                downloadpath[0] = customdownloadpathstr[0]
+                print("usecustom path "+ downloadpath[0])
+            elif askeverytime[0]== "true":
+                    #downloadpath.clear()
+                downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
+                if downpath1 != "":
+                    downloadpath[0] = downpath1
+                else:
+                    print("download canceled")
+                    downloadpath[0] = "" 
+                    
+                print("downloadpath is "+ downloadpath[0])
+            elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
+                if not(os.path.exists(downloadpath[0])):
+                    os.makedirs(mydir+"/videos")
+
+                downloadpath[0] = mydir+"/videos"
+            if downloadpath[0] != "":
+                self.label.setText("download started")    
+                self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
+                self.thread2.start()
+                self.thread2.calldowloadvideo.connect(self.downloadytvideo)
+                self.thread2.callerror.connect(self.errorpopup)
+                self.thread2.suicidefunc.connect(self.stoptreads)
+                self.thread2.buttonstates.connect(self.setbuttonstate)
+                self.thread2.notify.connect(self.nitificatonfunc)
         except:
             traceback.print_exc()
-            print("empty list")
-        
-        yturl = "self.getvideolink(vname)"
-        vqulity = self.CB_vqulity.currentText()
-        self.thread2 = dowload_selected_tread(url= yturl,qulity= vqulity)
-        self.thread2.start()
-        self.thread2.calldowloadvideo.connect(self.downloadytvideo)
-        self.thread2.callerror.connect(self.errorpopup)
-        self.thread2.suicidefunc.connect(self.stoptreads)
+            print("empty list")    
     #this func for do functionly when clicked download video button
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
@@ -552,14 +581,17 @@ class Ui_Form(object):
                 downpath1 = QtWidgets.QFileDialog.getExistingDirectory(None, 'download path',mydir)
                 if downpath1 != "":
                     downloadpath[0] = downpath1
+                else:
+                    print("download canceled")
+                    downloadpath[0] = ""
                 print("downloadpath is "+ downloadpath[0])
             elif askeverytime[0]== "false" and usecustomedowpath[0] == "false":
                 if not(os.path.exists(downloadpath[0])):
                     os.makedirs(mydir+"/videos")
 
-                downloadpath[0] = [mydir+"/videos"]
+                downloadpath[0] = mydir+"/videos"
 
-            if vurl !="":
+            if vurl !="" and downloadpath[0] != "":
                 print(downloadpath[0])
                 self.downloadytvideo(vurl,svqulity)
         except Exception as e:
@@ -577,14 +609,15 @@ class Ui_Form(object):
             item = model.item(i)
             if item.text() == vdeoname:
                 model.item(i).setBackground(brush)
-                #print("seting color to list viewer items")
-                model.item(i).setText(str(vdeoname)+" download finished")
+                model.item(i).setText(str(vdeoname)+" ✅")
     #unused            
     def downloadytvideocall(self,url,videoqulity):
         t1 = Thread(target=self.downloadytvideo,args=(url,videoqulity))
         t1.start()
     #this func for call video download thread
     def downloadytvideo(self,url,videoqulity):
+        self.setbuttonstate(False,1)
+        self.label.setText("download started")
         self.thread1 = video_dowload_tread(url= url,qulity= videoqulity)
         
         
@@ -592,6 +625,7 @@ class Ui_Form(object):
         self.thread1.change_value.connect(self.setProgressVal)
         self.thread1.finishvname.connect(self.downfineshscallback)
         self.thread1.callerror.connect(self.errorpopup)
+        self.thread1.buttonstates.connect(self.setbuttonstate)
     #this func for do things after download finished
     def downfineshscallback(self,finishvnam):
         print("download finished "+ finishvnam)
@@ -603,18 +637,6 @@ class Ui_Form(object):
         videostate[finishvnam] = "downloaded"
         #d_finished1 = True
         d_finished1[0] = True
-        '''try:
-            self.thread1.setTerminationEnabled(True)
-            self.thread1.terminate()
-            d_finished1[0] = True
-            self.progressBar.setValue(0)
-            #self.label.setText("Stoped")
-        except Exception as e:
-            traceback.print_exc()
-            print(e)
-            errorexct[0] = str(e)
-            print(errorexct)
-            self.errorpopup(str(errorexct))'''
     #this func for set proggres bar value
     def setProgressVal(self,prval,downloadspeed):
         print(str(prval)+" %")
@@ -639,23 +661,57 @@ class Ui_Form(object):
             print("saving to "+str(path))    
     #this func for do functionly when clicked remove selected button          
     def clk_removeselected(self):
-        print("remove selected")
-        '''try:'''
-        self.getcheckditems(model)
-        print(selectedvideos)
-        for i in selectedvideos:
-            print(i + str("fsafas"))
-            try:    
-                videodic.pop(i)
-            except Exception as e:
-                errorexct[0] = str(e)
-                self.errorpopup(str(errorexct))
-            else:        
-                print(str(i)+"removed")
-        self.listviwer(videodic)
-        selectedvideos.clear()
-        """except:
-            print("empty")"""
+        try:
+            print("remove selected")
+            lvselecteditemsindex = []
+            noneitemlist = []
+            removeditemslist = []
+            for index in range(model.rowCount()):
+                item = model.item(index)
+                if item != None:
+                    if item.checkState() == QtCore.Qt.Checked:
+                        lvselecteditemsindex.append(item.row())
+                        item1 = model.takeItem(item.row())
+                        removeditemslist.append(item1.text())
+                        del item1
+                        print(str(index)+str(item)+str(item.text()))
+                        time.sleep(0.05)
+            for index in range(model.rowCount()):
+                item = model.item(index)
+                if item == None:            
+                    print("have a none item ")
+                    noneitemlist.append(index)
+            print(noneitemlist)
+            icrindex = 0            
+            while 0 < len(noneitemlist):
+                icrindex+=1
+                print(str(icrindex))
+                for iindex in range(model.rowCount()):
+                    item = model.item(iindex)
+                    print(str(iindex))
+                    print(iindex)
+                    if item == None:
+                        print(str(index)+"none")
+                        if model.removeRow(iindex) == True:
+                            try:
+                                noneitemlist.pop()
+                            except:
+                                pass    
+            for i in removeditemslist:
+                if i in videodic.keys():
+                    videodic.pop(i)
+                elif "✅" in i:
+                    print("its downloaded video")
+                    newi = i.strip(" ✅")
+                    print(newi+"newi")
+                    print(str(videodic.keys()))    
+                    if newi in videodic.keys():
+                        print(newi +" newi in keylist")
+                        videodic.pop(newi)
+            print(videodic)
+        except:
+            pass                    
+        
     #this func for do functionly when clicked load button
     def clk_loadlistinhdd(self):
         path =  mydir+"/saves"
@@ -725,8 +781,8 @@ class Ui_Form(object):
         self.errmsg.showMessage(str(errorexct))
         d_finished1[0] = True
     #this func for stop running thread
-    def stoptreads(self):
-        print("stoptreads called")
+    def stoptreads(self,clickedbool = False,msg = "stopped"):
+        print(msg)
         
         try:
             self.thread2.setTerminationEnabled(True)
@@ -735,14 +791,17 @@ class Ui_Form(object):
             self.thread1.terminate()
             d_finished1[0] = True
             self.progressBar.setValue(0)
-            self.label.setText("Stoped")
+            self.setbuttonstate(True,0)
+            self.setbuttonstate(True,1)
+            self.label.setText(msg)
         except AttributeError:
             try:    
                 self.thread1.setTerminationEnabled(True)
                 self.thread1.terminate()
                 d_finished1[0] = True
                 self.progressBar.setValue(0)
-                self.label.setText("Stoped")
+                self.setbuttonstate(True,1)
+                self.label.setText(msg)
             except:
                 print("no threads") 
 
@@ -756,19 +815,35 @@ class Ui_Form(object):
     #this func for get qulitys in paseted video
     def getvideosinstreamscall(self):
         print("getting video qulitys")
+        self.setbuttonstate(False,2)
         self.thread1 = getvideoqultys_tread(url=str(self.LE_ulr.text()))
 
         self.thread1.start()
         self.thread1.setqltycombobox.connect(self.setqcombobox)
         self.thread1.callerror.connect(self.errorpopup)
+        self.thread1.buttonstates.connect(self.setbuttonstate)
+        self.thread1.suicidefunc.connect(self.stoptreads)
     #this func for set combobox list
     def setqcombobox(self,qltylist):
 
         self.CB_vqulity.addItems(qltylist)
-    
+    #this func for set buttons enable or disable
+    def setbuttonstate(self,buttonstate,buttonindex):
+        print("setbutton enable or disable")
+        buttonslist[buttonindex].setEnabled(buttonstate)
+    #this func for get notification
+    def nitificatonfunc(self,msg):
+        try:
+            notification.notify(
+                title = "Download Finished",
+                message= msg ,
+                timeout=1
+            )
+        except:
+            pass
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT DOWNLOADER"))
+        Form.setWindowTitle(_translate("DRAGON YT DOWNLOADER", "DRAGON YT VIDEO DOWNLOADER "+str(self.version)))
         self.pb_addurl.setText(_translate("Form", "Add Video"))
         self.pb_downloadvideo.setText(_translate("Form", "Download Video"))
         self.pb_downloadselected.setText(_translate("Form", "Download Selected"))

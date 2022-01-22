@@ -77,11 +77,13 @@ class Ui_Frame(object):
         self.usecustomeDpath.setToolTip("for use custome download path")
         if usecustomedowpath[0] == "true":
             self.usecustomeDpath.setChecked(True)
+            #self.askevertime.setChecked(False)
         self.usecustomeDpath.stateChanged.connect(self.usecustomedownpath_clk)
-        self.dpathlineEdit = QtWidgets.QLineEdit(Frame)
-        self.dpathlineEdit.setGeometry(QtCore.QRect(40, 90, 501, 20))
-        self.dpathlineEdit.setObjectName("dpathlineEdit")
-        self.dpathlineEdit.setStyleSheet(self.textinputstyle)
+        self.dpathlable = QtWidgets.QLabel(Frame)
+        self.dpathlable.setGeometry(QtCore.QRect(40, 90, 501, 20))
+        self.dpathlable.setObjectName("dpathlable")
+        self.dpathlable.setText(customdownloadpathstr[0])
+        self.dpathlable.setStyleSheet(self.textinputstyle)
         self.opensavepath = QtWidgets.QPushButton(Frame)
         self.opensavepath.setGeometry(QtCore.QRect(550, 90, 75, 23))
         self.opensavepath.setObjectName("opensavepath")
@@ -94,6 +96,7 @@ class Ui_Frame(object):
         self.askevertime.setToolTip("will ask path to download every time you press download button")
         if askeverytime[0] == "true":
             self.askevertime.setChecked(True)
+            self.usecustomeDpath.setChecked(False)
         self.askevertime.stateChanged.connect(self.askeverytime_clk)
         self.label = QtWidgets.QLabel(Frame)
         self.label.setGeometry(QtCore.QRect(40, 120, 181, 16))
@@ -171,11 +174,15 @@ class Ui_Frame(object):
     def askeverytime_clk(self):
        if self.askevertime.isChecked():
            askeverytime[0] = True
+           self.usecustomeDpath.setChecked(False)
+           usecustomedowpath[0] = False
        else:
            askeverytime[0] = False   
     def usecustomedownpath_clk(self):
         if self.usecustomeDpath.isChecked():
             usecustomedowpath[0] = True
+            self.askevertime.setChecked(False)
+            askeverytime[0] = False
             print(str(self.usecustomeDpath.isChecked()))
         else:
             usecustomedowpath[0] = False      
