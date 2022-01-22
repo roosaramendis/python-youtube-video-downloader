@@ -24,7 +24,7 @@ and high qulitys are not available in play list download. when you download play
 used third party libraries 
   pytube https://pypi.org/project/pytube/
   pyqt5 https://pypi.org/project/PyQt5/
-
+  plyer https://pypi.org/project/plyer/
 to fix regexmatcherror change code of  C:\Users\xxxx\AppData\Local\Programs\Python\Python310\lib\site-packages\pytube\chiper.py to this https://github.com/pytube/pytube/pull/1200/files
 
 created by roosara mendis  
