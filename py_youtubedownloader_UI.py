@@ -29,6 +29,8 @@ import re
 import os
 import pickle
 import traceback
+from PyQt5.QtCore import QFile, QTextStream
+
 #..........................................
 
 #____________global variables________________
@@ -74,6 +76,8 @@ global vqultybyitagdic # to save video qulity as a key and itag as value
 vqultybyitagdic = {}
 global buttonslist
 buttonslist = []
+global checkforresval
+checkforresval = [False]
 #.......................................................
 
 # class for get qualitys in vided
@@ -302,7 +306,7 @@ class Ui_Form(object):
         self.LE_ulr.setGeometry(QtCore.QRect(10, 70, 618, 21))
         self.LE_ulr.setObjectName("LE_ulr")
         self.LE_ulr.setToolTip(" paste url here you want to download . if you need to download playlist you can add yt playlist link and the click add video")
-        self.LE_ulr.setStyleSheet(self.textinputstyle)
+        
         self.LE_ulr.textChanged.connect(self.getvideosinstreamscall)
         #...........................................................................
 
@@ -311,7 +315,7 @@ class Ui_Form(object):
         self.pb_addurl.setGeometry(QtCore.QRect(10, 10, 61, 51))
         self.pb_addurl.setObjectName("pb_addurl")
         self.pb_addurl.setToolTip(" this is for add video or video playlist in url to list view ")
-        self.pb_addurl.setStyleSheet(self.commenstyle)
+        
         self.pb_addurl.clicked.connect(self.clk_addvideo)
         #...............................................................
 
@@ -319,12 +323,12 @@ class Ui_Form(object):
         self.lv_url = QtWidgets.QListView(Form)
         self.lv_url.setGeometry(QtCore.QRect(10, 150, 618, 331))
         self.lv_url.setObjectName("lv_url")
-        self.lv_url.setStyleSheet(self.commenstyle2)
+        
         #.......................................................
 
         #_____________setup of error message____________
         self.errmsg = QtWidgets.QErrorMessage(Form)
-        self.errmsg.setStyleSheet(self.commenstyle)
+        
         #................................................
 
         #_______________setup of download video button___________________
@@ -333,7 +337,7 @@ class Ui_Form(object):
         self.pb_downloadvideo.setCheckable(False)
         self.pb_downloadvideo.setObjectName("pb_downloadvideo")
         self.pb_downloadvideo.setToolTip(" this is for download video in url directly(only able to download one video cant download a list) ")
-        self.pb_downloadvideo.setStyleSheet(self.commenstyle)
+        
         self.pb_downloadvideo.clicked.connect(self.clk_dowloadvideo)
         #..................................................................
 
@@ -343,23 +347,30 @@ class Ui_Form(object):
         self.pb_downloadselected.setObjectName("pb_downloadselected")
         self.pb_downloadselected.setToolTip(" this is for download only selected videos (this will able to download a playlist or multiple playlists)")
         self.pb_downloadselected.clicked.connect(self.clk_downloadselectedcall)
-        self.pb_downloadselected.setStyleSheet(self.commenstyle)
+        
         
         #.......................................................................
+
+        self.checkforres = QtWidgets.QCheckBox(Form)
+        self.checkforres.setGeometry(QtCore.QRect(410, 10, 220, 17))
+        self.checkforres.setObjectName("checkforres")
+
+        self.checkforres.setToolTip("<html><head/><body><p>if this was checked you will able to get all avalilable resalutions of paseted url</p><p><br/></p><p> this may take a few second depend on your network speed and add url button will disable till shearching resolution done. you can disable this if you going to add url to list</p></body></html>")
+        self.checkforres.stateChanged.connect(self.checkforres_clk)
 
         #____________setup of settings button_______________________
         self.pb_settings = QtWidgets.QPushButton(Form)
         self.pb_settings.setGeometry(QtCore.QRect(575, 10, 50, 31))
         self.pb_settings.setObjectName("pb_settings")
-        self.pb_settings.setStyleSheet(self.commenstyle)
+        
         #...........................................................
 
         #__________setup of proggers bar____________________
         self.progressBar = QtWidgets.QProgressBar(Form)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setGeometry(QtCore.QRect(10, 485, 301, 30))
-        self.progressBar.setStyleSheet(self.commenstyle2)
-        self.progressBar.setValue(proggrespresent5)
+        self.progressBar.setValue(0)
+        #self.progressBar.setValue(proggrespresent5)
         #...................................................
 
         #_____________setup of combobox for select video qulty____________
@@ -368,7 +379,7 @@ class Ui_Form(object):
         self.CB_vqulity.setGeometry(QtCore.QRect(300, 120, 324, 22))
         self.CB_vqulity.addItems(["720p","360p","144p"])
         
-        self.CB_vqulity.setStyleSheet(self.commenstyle)
+        
         #.................................................................
 
         #_________setup for stats showing lable_______________________  
@@ -384,7 +395,7 @@ class Ui_Form(object):
         self.savelist.setObjectName(u"savelist")
         self.savelist.setGeometry(QtCore.QRect(10, 120, 75, 23))
         self.savelist.setToolTip(" this is for save list of video you add on your hdd ")
-        self.savelist.setStyleSheet(self.commenstyle)
+        
         self.savelist.clicked.connect(self.clk_savelist)
         #..........................................................
 
@@ -393,7 +404,7 @@ class Ui_Form(object):
         self.removeselecteditems.setObjectName(u"removeselecteditems")
         self.removeselecteditems.setGeometry(QtCore.QRect(170, 120, 91, 23))
         self.removeselecteditems.setToolTip(" you can remove selected video from list")
-        self.removeselecteditems.setStyleSheet(self.commenstyle)
+        
         self.removeselecteditems.clicked.connect(self.clk_removeselected)
         #..................................................................
 
@@ -402,7 +413,7 @@ class Ui_Form(object):
         self.loadlistinhdd.setObjectName(u"loadlistinhdd")
         self.loadlistinhdd.setGeometry(QtCore.QRect(90, 120, 75, 23))
         self.loadlistinhdd.setToolTip(" this is for load saved list in hdd ")
-        self.loadlistinhdd.setStyleSheet(self.commenstyle)
+        
         self.loadlistinhdd.clicked.connect(self.clk_loadlistinhdd)
         #.......................................................
 
@@ -411,7 +422,7 @@ class Ui_Form(object):
         self.stopevents.setObjectName(u"stopevents")
         self.stopevents.setGeometry(QtCore.QRect(310, 10, 81, 51))
         self.stopevents.clicked.connect(self.stoptreads)
-        self.stopevents.setStyleSheet(self.commenstyle)
+        
         #.................................................
         self.msgbox = QtWidgets.QMessageBox(Form)
         self.versionf = open("version.txt","r")
@@ -421,6 +432,13 @@ class Ui_Form(object):
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
     #this func for get keys of videodic dictionary and return list of keys
+
+    def checkforres_clk(self):
+        if self.checkforres.isChecked():
+           self.settingval.setValue("checkforres","true")
+        else:
+           self.settingval.setValue("checkforres","false")
+
     def getkeyslist(self,dict):
         list = []
         for key in dict.keys():
@@ -538,6 +556,8 @@ class Ui_Form(object):
             traceback.print_exc()
             print("empty list")    
     #this func for do functionly when clicked download video button
+    
+
     def clk_dowloadvideo(self):
         vurl = self.LE_ulr.text()
         vqulity = self.CB_vqulity.currentText()
@@ -814,15 +834,16 @@ class Ui_Form(object):
             self.errorpopup(str(errorexct))'''
     #this func for get qulitys in paseted video
     def getvideosinstreamscall(self):
-        print("getting video qulitys")
-        self.setbuttonstate(False,2)
-        self.thread1 = getvideoqultys_tread(url=str(self.LE_ulr.text()))
+        if self.settingval.value("checkforres") == "true":
+            print("getting video qulitys")
+            self.setbuttonstate(False,2)
+            self.thread1 = getvideoqultys_tread(url=str(self.LE_ulr.text()))
 
-        self.thread1.start()
-        self.thread1.setqltycombobox.connect(self.setqcombobox)
-        self.thread1.callerror.connect(self.errorpopup)
-        self.thread1.buttonstates.connect(self.setbuttonstate)
-        self.thread1.suicidefunc.connect(self.stoptreads)
+            self.thread1.start()
+            self.thread1.setqltycombobox.connect(self.setqcombobox)
+            self.thread1.callerror.connect(self.errorpopup)
+            self.thread1.buttonstates.connect(self.setbuttonstate)
+            self.thread1.suicidefunc.connect(self.stoptreads)
     #this func for set combobox list
     def setqcombobox(self,qltylist):
 
@@ -852,13 +873,19 @@ class Ui_Form(object):
         self.loadlistinhdd.setText(_translate("Form", "Load List"))
         self.removeselecteditems.setText(_translate("Form", "Remove selected"))
         self.stopevents.setText(_translate("Frame", "Stop"))
+        self.checkforres.setText(_translate("Frame", "check for other reselutions"))
         #self.selectall.setText(_translate("Form", "Select All"))
-        Form.setStyleSheet("border: 1px solid black;"+"background-color: Black;")
+        #Form.setStyleSheet("border: 1px solid black;"+"background-color: Black;")
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    
+    stylef = QFile("style1.css") 
+    stylef.open(QFile.ReadOnly | QFile.Text)
+    stylesheet = QTextStream(stylef)
+    stylesheetstr =stylesheet.readAll()
+    print(stylesheetstr)
+    app.setStyleSheet(stylesheetstr)
     Form = QtWidgets.QWidget()
     ui = Ui_Form()
     ui.setupUi(Form)

@@ -3,7 +3,7 @@
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
-
+from PyQt5.QtCore import QFile, QTextStream
 import sys
 import py_youtubedownloader_UI, py_settings,info
 
@@ -33,6 +33,12 @@ class downloader_window(QtWidgets.QMainWindow, py_youtubedownloader_UI.Ui_Form):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    stylef = QFile("style1.css") 
+    stylef.open(QFile.ReadOnly | QFile.Text)
+    stylesheet = QTextStream(stylef)
+    stylesheetstr =stylesheet.readAll()
+    print(stylesheetstr)
+    app.setStyleSheet(stylesheetstr)
     main = downloader_window()
     main.show()
     sys.exit(app.exec_())
